@@ -17,6 +17,10 @@ export default {
         return await handleRootRequest(request, USERNAME, PASSWORD, enableAuth);
       case `/${adminPath}`:
         return await handleAdminRequest(DATABASE, request, USERNAME, PASSWORD);
+      case '/docs':
+        return new Response(generateDocsPage(), {
+        headers: { 'Content-Type': 'text/html; charset=UTF-8' }
+        });
       case '/upload':
         return request.method === 'POST' ? await handleUploadRequest(request, DATABASE, enableAuth, USERNAME, PASSWORD, domain, TG_BOT_TOKEN, TG_CHAT_ID, maxSize) : new Response('Method Not Allowed', { status: 405 });
       case '/bing-images':
@@ -1007,4 +1011,55 @@ async function handleDeleteImagesRequest(request, DATABASE, USERNAME, PASSWORD) 
   } catch (error) {
     return new Response(JSON.stringify({ error: '删除失败', details: error.message }), { status: 500 });
   }
+}
+
+function generateDocsPage() {
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>API Documentation</title>
+      <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+          .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+          h1 { color: #229ED9; text-align: center; }
+          code { background: #eee; padding: 3px 6px; border-radius: 5px; }
+          .endpoint { margin-bottom: 20px; }
+          .endpoint h2 { color: #333; font-size: 18px; }
+          .method { font-weight: bold; color: white; padding: 3px 7px; border-radius: 5px; }
+          .get { background: #4CAF50; }
+          .post { background: #FF9800; }
+          .response { background: #222; color: #fff; padding: 10px; border-radius: 5px; font-size: 14px; }
+      </style>
+  </head>
+  <body>
+      <div class="container">
+          <h1>📜 API Documentation</h1>
+
+          <div class="endpoint">
+              <h2><span class="method get">GET</span> /upload</h2>
+              <p>Upload a file through the API.</p>
+              <pre class="response">curl -X POST "https://your-worker-domain/upload-api" -F "file=@image.jpg"</pre>
+          </div>
+
+          <div class="endpoint">
+              <h2><span class="method post">POST</span> /telegram-webhook</h2>
+              <p>Handles media uploads from Telegram bot.</p>
+              <pre class="response">{
+  "message": "File uploaded successfully",
+  "url": "https://your-domain.com/filename.jpg"
+}</pre>
+          </div>
+
+          <div class="endpoint">
+              <h2><span class="method get">GET</span> /docs</h2>
+              <p>Returns this documentation page.</p>
+          </div>
+
+      </div>
+  </body>
+  </html>
+  `;
 }
